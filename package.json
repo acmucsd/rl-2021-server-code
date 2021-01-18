@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node lib/server.js"
+    "start": "node lib/server.js",
+    "build": "tsc && cp -r src/Golf-main lib"
   },
   "repository": {
     "type": "git",
