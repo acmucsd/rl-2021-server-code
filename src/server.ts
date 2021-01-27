@@ -42,7 +42,7 @@ app.post("/eval", upload_dir.single("agent"), async (req, res) => {
   let result = [];
   let error = { code: 200, error: null, msg: null };
   try {
-    result = `${execSync(`python3 -m src.Golf-main.testAgent`)}`.split("\n");
+    result = `${execSync(`python3 ${__dirname}/Golf-main/testAgent.py`)}`.split("\n");
   } catch (err) {
     error.code = 400;
     error.error = `${err}`;
