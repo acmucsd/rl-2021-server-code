@@ -3,6 +3,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import multer from 'multer';
 import fs from 'fs';
+import extract from 'extract-zip';
 import {execSync} from 'child_process';
 
 declare global {
@@ -26,23 +27,29 @@ app.get("/", (req, res) => {
   res.json({ msg: "online" });
 });
 const scriptPath = `${__dirname}/Golf-main/testAgent.py`;
-app.post("/eval", upload_dir.single('agent'), (req, res) => {
+app.post("/eval", upload_dir.single('agent'), async (req, res) => {
   
-  // copy file for use
-  let testPath = `${__dirname}/Golf-main/origagent.zip`;
   if (!fs.existsSync(`${__dirname}/Golf-main/agent`)) {
     fs.mkdirSync(`${__dirname}/Golf-main/agent`);
   }
-  `${execSync(`mv ${req.file.path} ${testPath}`)}`.split("\n");
-  `${execSync(`tar -xf ${testPath} -C ${__dirname}/Golf-main/agent --strip-components 1`)}`
+  try {
+    await extract(req.file.path, { dir: `${__dirname}/Golf-main/agent` })
+  } catch (err) {
+    // handle any errors
+    res.status(400);
+    res.json({msg: "error occured with extracting agent", error: err});
+    return;
+  } 
 
   const result = `${execSync("python3 " + scriptPath)}`.split("\n");
   let score = 0;
+  let error = {code: 200, error: null, msg: null};
   for (let i = 0; i < result.length; i++) {
     const line = result[i];
     if (line.length >= 5 && line.slice(0,5) === "ERROR") {
-      res.status(403);
-      res.json({msg: "Error occured", error: line});
+      error.error = line;
+      error.msg = "error occured";
+      error.code = 400;
       break;
     }
     if (line == "RESULT") {
@@ -51,10 +58,15 @@ app.post("/eval", upload_dir.single('agent'), (req, res) => {
     }
   }
 
-  fs.unlinkSync(testPath);
+  fs.unlinkSync(req.file.path);
   `${execSync(`rm -r ${__dirname}/Golf-main/agent/*`)}`
 
-  res.json({msg: "evalated agent", score});
+  if (error.code !== 200) {
+    res.status(403);
+    res.json(error);
+  } else {
+    res.json({msg: "evalated agent", score});
+  }
 });
 
 app.listen(port).on("listening", () => {
