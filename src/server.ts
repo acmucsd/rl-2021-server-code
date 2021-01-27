@@ -27,6 +27,15 @@ app.get("/", (req, res) => {
 });
 const scriptPath = `${__dirname}/Golf-main/testAgent.py`;
 app.post("/eval", upload_dir.single('agent'), (req, res) => {
+  
+  // copy file for use
+  let testPath = `${__dirname}/Golf-main/origagent.zip`;
+  if (!fs.existsSync(`${__dirname}/Golf-main/agent`)) {
+    fs.mkdirSync(`${__dirname}/Golf-main/agent`);
+  }
+  `${execSync(`mv ${req.file.path} ${testPath}`)}`.split("\n");
+  `${execSync(`tar -xf ${testPath} -C ${__dirname}/Golf-main/agent --strip-components 1`)}`
+
   const result = `${execSync("python3 " + scriptPath)}`.split("\n");
   let score = 0;
   for (let i = 0; i < result.length; i++) {
@@ -41,7 +50,10 @@ app.post("/eval", upload_dir.single('agent'), (req, res) => {
       break;
     }
   }
-  fs.unlinkSync(req.file.path);
+
+  fs.unlinkSync(testPath);
+  `${execSync(`rm -r ${__dirname}/Golf-main/agent/*`)}`
+
   res.json({msg: "evalated agent", score});
 });
 
