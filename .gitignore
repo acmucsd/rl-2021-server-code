@@ -3,4 +3,4 @@
 lib
 node_modules
 uploads
-__pycache
+__pycache__

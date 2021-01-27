@@ -1,16 +1,16 @@
 import random
 try:
     # import gym
-    # # import Golf
-    from .agent import Agent
+    # import Golf
+    from .agent.agent import agent
 except Exception as e:
     print("ERROR: Missing Agent Class:\n" + str(e))
     exit()
 
 
-env = gym.make('Golf-v0')
+# env = gym.make('Golf-v0')
 try:
-    urAgent = Agent()
+    urAgent = agent.Agent()
 except Exception as e:
     print("ERROR: Could not instantiate agent:\n" + str(e))
     exit()
