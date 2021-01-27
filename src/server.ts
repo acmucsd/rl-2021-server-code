@@ -28,10 +28,14 @@ app.get("/", (req, res) => {
 const scriptPath = `${__dirname}/Golf-main/testAgent.py`;
 app.post("/eval", upload_dir.single('agent'), (req, res) => {
   const result = `${execSync("python3 " + scriptPath)}`.split("\n");
-  let readRes = false;
   let score = 0;
   for (let i = 0; i < result.length; i++) {
     const line = result[i];
+    if (line.length >= 5 && line.slice(0,5) === "ERROR") {
+      res.status(403);
+      res.json({msg: "Error occured", error: line});
+      break;
+    }
     if (line == "RESULT") {
       score = parseFloat(result[i + 1]);
       break;

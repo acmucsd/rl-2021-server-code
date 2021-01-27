@@ -1,8 +1,8 @@
 import random
 try:
-    import gym
-    import Golf
-    from agent import Agent
+    # import gym
+    # # import Golf
+    from .agent import Agent
 except Exception as e:
     print("ERROR: Missing Agent Class:\n" + str(e))
     exit()
